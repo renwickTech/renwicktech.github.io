@@ -1,6 +1,11 @@
 name: Health Check
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - '!docs/data.json'
   schedule:
     # Runs every 15 minutes. Adjust as needed (cron is UTC).
     - cron: '*/15 * * * *'
@@ -9,9 +14,16 @@ on:
 permissions:
   contents: write
   issues: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   health-check:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -64,7 +76,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/data.json
           if ! git diff --cached --quiet; then
-            git commit -m "chore: record health check result [skip ci]"
+            git commit -m "chore: record health check result"
             git pull --rebase
             git push
           else
@@ -109,3 +121,23 @@ jobs:
       - name: Mark run as failed
         if: steps.check.outputs.status == 'down'
         run: exit 1
+
+  deploy:
+    needs: health-check
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
