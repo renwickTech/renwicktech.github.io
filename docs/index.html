@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>renwicktech</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0f14;
+            --panel: #121821;
+            --border: #1e2731;
+            --text: #e7edf3;
+            --muted: #7c8a99;
+            --good: #35d399;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 88px 20px;
+        }
+
+        main { width: 100%; max-width: 560px; }
+
+        .eyebrow {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin: 0 0 10px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            margin: 0 0 16px;
+        }
+
+        p.lede {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--muted);
+            margin: 0 0 40px;
+            max-width: 44ch;
+        }
+
+        .card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px 20px;
+            text-decoration: none;
+            color: inherit;
+            transition: border-color 0.15s ease;
+        }
+
+        .card:hover { border-color: #33404c; }
+
+        .card-left { display: flex; align-items: center; gap: 14px; }
+
+        .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--good);
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 500;
+            margin: 0 0 2px;
+        }
+
+        .card-sub {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--muted);
+            margin: 0;
+        }
+
+        .arrow {
+            color: var(--muted);
+            font-size: 16px;
+        }
+
+        footer {
+            margin-top: 48px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--muted);
+        }
+    </style>
+</head>
+<body>
+<main>
+    <p class="eyebrow">renwicktech</p>
+    <h1>Hi, welcome.</h1>
+    <p class="lede">This is the home for a few small things I run. Start here.</p>
+
+    <a class="card" href="api-service-status.html">
+    <span class="card-left">
+      <span class="dot"></span>
+      <span>
+        <p class="card-title">API service status</p>
+        <p class="card-sub">Live health checks, uptime and history</p>
+      </span>
+    </span>
+        <span class="arrow">&rarr;</span>
+    </a>
+
+    <footer>renwicktech.github.io</footer>
+</main>
+</body>
+</html>
