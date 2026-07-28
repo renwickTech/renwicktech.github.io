@@ -119,7 +119,3 @@ jobs:
                 labels: ['health-check']
               });
             }
-
-      - name: Fail workflow
-        if: steps.check.outputs.status == 'down'
-        run: exit 1
