@@ -40,7 +40,7 @@
         background: transparent;
       }
 
-      .muted {
+      .incident-message {
         margin-bottom: 0;
       }
     </style>
@@ -48,9 +48,13 @@
   <body>
     <main>
       <h1>API Service Status</h1>
-      <section class="status-card" aria-label="Current API service status">
-        <p><strong>Current status:</strong> <span class="status-label">Operational</span></p>
-        <p class="muted">No active incidents reported.</p>
+      <section class="status-card" aria-label="Current API service status" data-service="api">
+        <p>
+          <strong>Current status:</strong>
+          <span class="status-label" data-status="operational">Operational</span>
+        </p>
+        <p class="incident-message">No active incidents reported.</p>
+        <p class="incident-message">Update this page manually if service status changes.</p>
       </section>
     </main>
   </body>
