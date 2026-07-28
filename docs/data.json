@@ -4,5 +4,11 @@
     "status": "up",
     "httpStatus": 200,
     "latencyMs": 384
+  },
+  {
+    "timestamp": "2026-07-28T11:04:06Z",
+    "status": "up",
+    "httpStatus": 200,
+    "latencyMs": 534
   }
 ]
