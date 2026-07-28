@@ -1,33 +1,20 @@
 name: Health Check
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'docs/**'
-      - '!docs/data.json'
   schedule:
-    # Runs every 15 minutes. Adjust as needed (cron is UTC).
     - cron: '*/15 * * * *'
-  workflow_dispatch: {} # allows manual triggering from the Actions tab
+  workflow_dispatch:
 
 permissions:
   contents: write
   issues: write
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
 
 jobs:
   health-check:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Run health check
         id: check
@@ -55,42 +42,52 @@ jobs:
           echo "latency=$LATENCY" >> "$GITHUB_OUTPUT"
           echo "timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
-          echo "Checked $URL -> $HTTP_STATUS ($STATUS) in ${LATENCY}ms"
-
       - name: Record result
         run: |
           mkdir -p docs
           FILE=docs/data.json
-          if [ ! -f "$FILE" ]; then echo "[]" > "$FILE"; fi
 
-          jq --arg ts "${{ steps.check.outputs.timestamp }}" \
-             --arg status "${{ steps.check.outputs.status }}" \
-             --argjson httpStatus "${{ steps.check.outputs.http_status }}" \
-             --argjson latencyMs "${{ steps.check.outputs.latency }}" \
-             '. + [{timestamp:$ts, status:$status, httpStatus:$httpStatus, latencyMs:$latencyMs}] | .[-200:]' \
-             "$FILE" > tmp.json && mv tmp.json "$FILE"
+          if [ ! -f "$FILE" ]; then
+            echo "[]" > "$FILE"
+          fi
+
+          jq \
+            --arg ts "${{ steps.check.outputs.timestamp }}" \
+            --arg status "${{ steps.check.outputs.status }}" \
+            --argjson httpStatus "${{ steps.check.outputs.http_status }}" \
+            --argjson latencyMs "${{ steps.check.outputs.latency }}" \
+            '. + [{
+              timestamp:$ts,
+              status:$status,
+              httpStatus:$httpStatus,
+              latencyMs:$latencyMs
+            }] | .[-200:]' \
+            "$FILE" > tmp.json
+
+          mv tmp.json "$FILE"
 
       - name: Commit and push
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name github-actions[bot]
+          git config user.email github-actions[bot]@users.noreply.github.com
+
           git add docs/data.json
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: record health check result"
-            git pull --rebase
-            git push
-          else
-            echo "No changes to commit"
+
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
           fi
 
-      # Opens/updates a GitHub issue when the endpoint is down,
-      # so failures are visible without needing to watch Actions runs.
+          git commit -m "chore: record health check result"
+          git push
+
       - name: Open issue on failure
         if: steps.check.outputs.status == 'down'
         uses: actions/github-script@v7
         with:
           script: |
             const title = 'Health check failed';
+
             const { data: issues } = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -98,8 +95,13 @@ jobs:
               labels: 'health-check'
             });
 
-            const existing = issues.find(issue => issue.title === title);
-            const body = `The scheduled health check returned a non-2xx response.\n\nRun: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const existing = issues.find(i => i.title === title);
+
+            const body =
+              `The scheduled health check failed.
+
+              Run:
+              ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
 
             if (existing) {
               await github.rest.issues.createComment({
@@ -118,26 +120,6 @@ jobs:
               });
             }
 
-      - name: Mark run as failed
+      - name: Fail workflow
         if: steps.check.outputs.status == 'down'
         run: exit 1
-
-  deploy:
-    needs: health-check
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
