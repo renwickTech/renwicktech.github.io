@@ -1,65 +1,331 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>API Service Status</title>
-    <style>
-      :root {
-        color-scheme: light dark;
-      }
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Service status</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f14;
+    --panel: #121821;
+    --border: #1e2731;
+    --text: #e7edf3;
+    --muted: #7c8a99;
+    --good: #35d399;
+    --good-dim: #1c4a3b;
+    --bad: #ff5468;
+    --bad-dim: #5a2530;
+  }
 
-      body {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        margin: 0;
-        padding: 2rem;
-        line-height: 1.5;
-      }
+  * { box-sizing: border-box; }
 
-      main {
-        max-width: 720px;
-        margin: 0 auto;
-      }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 64px 20px;
+  }
 
-      h1 {
-        margin-top: 0;
-      }
+  main {
+    width: 100%;
+    max-width: 640px;
+  }
 
-      .status-card {
-        border: 1px solid currentColor;
-        border-radius: 0.5rem;
-        padding: 1rem;
-      }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin: 0 0 8px;
+  }
 
-      .status-label {
-        display: inline-block;
-        border-radius: 999px;
-        padding: 0.25rem 0.75rem;
-        font-weight: 600;
-        border: 1px solid currentColor;
-        background: transparent;
-      }
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 40px;
+    letter-spacing: -0.01em;
+  }
 
-      .incident-message {
-        margin-bottom: 0;
-      }
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 6px;
+  }
 
-      .status-note {
-        margin-bottom: 0;
+  .dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--good);
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .dot::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 1px solid var(--good);
+    opacity: 0.5;
+    animation: ring 2.2s ease-out infinite;
+  }
+
+  .dot.bad { background: var(--bad); }
+  .dot.bad::after { border-color: var(--bad); }
+
+  @keyframes ring {
+    0% { transform: scale(0.6); opacity: 0.6; }
+    100% { transform: scale(1.9); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dot::after { animation: none; display: none; }
+  }
+
+  .status-text {
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  .status-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0 0 36px 25px;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 40px;
+  }
+
+  .stat {
+    background: var(--panel);
+    padding: 16px 18px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 8px;
+  }
+
+  .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .trace-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 20px 8px;
+    margin-bottom: 32px;
+  }
+
+  .trace-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 12px;
+  }
+
+  #trace { width: 100%; height: 100px; display: block; }
+
+  .history {
+    display: flex;
+    gap: 3px;
+    margin-top: 16px;
+    height: 24px;
+    align-items: flex-end;
+  }
+
+  .tick {
+    flex: 1;
+    height: 100%;
+    background: var(--good-dim);
+    border-radius: 2px;
+    position: relative;
+  }
+
+  .tick.bad { background: var(--bad-dim); }
+
+  .tick::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 2px;
+    background: var(--good);
+  }
+
+  .tick.bad::before { background: var(--bad); }
+
+  footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  footer a { color: var(--muted); }
+
+  .empty {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Health monitor</p>
+  <h1>Service status</h1>
+
+  <div class="status-row">
+    <span class="dot" id="dot"></span>
+    <span class="status-text" id="status-text">Loading&hellip;</span>
+  </div>
+  <p class="status-sub" id="status-sub">&nbsp;</p>
+
+  <div class="stats">
+    <div class="stat">
+      <p class="stat-label">Uptime</p>
+      <p class="stat-value" id="stat-uptime">&mdash;</p>
+    </div>
+    <div class="stat">
+      <p class="stat-label">Checks logged</p>
+      <p class="stat-value" id="stat-count">&mdash;</p>
+    </div>
+    <div class="stat">
+      <p class="stat-label">Last checked</p>
+      <p class="stat-value" id="stat-last">&mdash;</p>
+    </div>
+  </div>
+
+  <div class="trace-panel">
+    <p class="trace-label">Pulse</p>
+    <svg id="trace" viewBox="0 0 600 100" preserveAspectRatio="none"></svg>
+    <div class="history" id="history"></div>
+  </div>
+
+  <footer>
+    <span id="interval-note">Checked periodically via GitHub Actions</span>
+    <a href="../../actions" id="runs-link">View runs &rarr;</a>
+  </footer>
+</main>
+
+<script>
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+
+  function fmtTime(iso) {
+    const d = new Date(iso);
+    return d.toLocaleString(undefined, {
+      month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  }
+
+  function buildTrace(entries) {
+    const svg = document.getElementById('trace');
+    svg.innerHTML = '';
+    const width = 600, height = 100, mid = 50;
+    const n = entries.length;
+    if (n === 0) return;
+    const step = width / n;
+
+    let d = `M 0 ${mid}`;
+    entries.forEach((entry, i) => {
+      const x = i * step;
+      const xNext = x + step;
+      const xMid = x + step / 2;
+      if (entry.status === 'up') {
+        d += ` L ${xMid - step * 0.15} ${mid} L ${xMid} ${mid - 18} L ${xMid + step * 0.15} ${mid} L ${xNext} ${mid}`;
+      } else {
+        d += ` L ${xMid - step * 0.1} ${mid} L ${xMid} ${mid + 34} L ${xMid + step * 0.1} ${mid} L ${xNext} ${mid}`;
       }
-    </style>
-  </head>
-  <body>
-    <main>
-      <h1>API Service Status</h1>
-      <section class="status-card" aria-label="Current API service status" data-service="api">
-        <p>
-          <strong>Current status:</strong>
-          <span class="status-label" data-status="operational">Operational</span>
-        </p>
-        <p class="incident-message">No active incidents reported.</p>
-        <p class="status-note">Update this page manually if service status changes.</p>
-      </section>
-    </main>
-  </body>
+    });
+
+    const path = document.createElementNS(SVG_NS, 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', entries[entries.length - 1].status === 'up' ? '#35d399' : '#ff5468');
+    path.setAttribute('stroke-width', '2');
+    path.setAttribute('stroke-linejoin', 'round');
+    svg.appendChild(path);
+  }
+
+  function buildHistory(entries) {
+    const container = document.getElementById('history');
+    container.innerHTML = '';
+    const recent = entries.slice(-60);
+    recent.forEach(entry => {
+      const tick = document.createElement('div');
+      tick.className = 'tick' + (entry.status === 'up' ? '' : ' bad');
+      tick.title = `${fmtTime(entry.timestamp)} — ${entry.status === 'up' ? 'operational' : 'down'} (${entry.httpStatus ?? 'n/a'})`;
+      container.appendChild(tick);
+    });
+  }
+
+  async function render() {
+    let entries = [];
+    try {
+      const res = await fetch('data.json', { cache: 'no-store' });
+      entries = await res.json();
+    } catch (e) {
+      document.getElementById('status-text').textContent = 'No data yet';
+      document.getElementById('status-sub').textContent = 'The first health check run hasn\'t landed here yet.';
+      return;
+    }
+
+    if (!entries.length) {
+      document.getElementById('status-text').textContent = 'No checks logged yet';
+      document.getElementById('status-sub').textContent = 'Once the workflow runs, results will appear here.';
+      return;
+    }
+
+    const latest = entries[entries.length - 1];
+    const isUp = latest.status === 'up';
+    const upCount = entries.filter(e => e.status === 'up').length;
+    const uptimePct = ((upCount / entries.length) * 100).toFixed(1);
+
+    document.getElementById('dot').classList.toggle('bad', !isUp);
+    document.getElementById('status-text').textContent = isUp ? 'Operational' : 'Down';
+    document.getElementById('status-sub').textContent = isUp
+      ? `Responded ${latest.httpStatus} in ${latest.latencyMs}ms`
+      : `Last response: ${latest.httpStatus ?? 'no response'}`;
+
+    document.getElementById('stat-uptime').textContent = `${uptimePct}%`;
+    document.getElementById('stat-count').textContent = entries.length;
+    document.getElementById('stat-last').textContent = fmtTime(latest.timestamp);
+
+    buildTrace(entries.slice(-40));
+    buildHistory(entries);
+  }
+
+  render();
+</script>
+</body>
 </html>
