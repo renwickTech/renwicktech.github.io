@@ -214,5 +214,11 @@
     "status": "up",
     "httpStatus": 200,
     "latencyMs": 466
+  },
+  {
+    "timestamp": "2026-07-29T10:25:25Z",
+    "status": "up",
+    "httpStatus": 200,
+    "latencyMs": 341
   }
 ]
