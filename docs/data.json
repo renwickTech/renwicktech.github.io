@@ -358,5 +358,11 @@
     "status": "down",
     "httpStatus": 429,
     "latencyMs": 476
+  },
+  {
+    "timestamp": "2026-07-30T02:19:08Z",
+    "status": "down",
+    "httpStatus": 429,
+    "latencyMs": 498
   }
 ]
