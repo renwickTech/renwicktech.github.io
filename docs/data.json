@@ -1000,5 +1000,11 @@
     "status": "down",
     "httpStatus": 429,
     "latencyMs": 500
+  },
+  {
+    "timestamp": "2026-08-08T11:58:12Z",
+    "status": "down",
+    "httpStatus": 429,
+    "latencyMs": 466
   }
 ]
