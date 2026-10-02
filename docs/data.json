@@ -1,11 +1,5 @@
 [
   {
-    "timestamp": "2026-09-28T19:40:52Z",
-    "status": "down",
-    "httpStatus": 404,
-    "latencyMs": 389
-  },
-  {
     "timestamp": "2026-09-28T19:50:35Z",
     "status": "down",
     "httpStatus": 404,
@@ -1198,5 +1192,11 @@
     "status": "down",
     "httpStatus": 404,
     "latencyMs": 621
+  },
+  {
+    "timestamp": "2026-10-02T02:39:23Z",
+    "status": "down",
+    "httpStatus": 404,
+    "latencyMs": 389
   }
 ]
